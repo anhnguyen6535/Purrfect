@@ -119,13 +119,14 @@ void handleRemoteCommand(int command){
         break;
 
       case IR_BUTTON_2:
-        Serial.println("DEBUG: Two GREEN");
-        setColors(0, 255, 0);
+        Serial.println("DEBUG: Two READING LIGHT");
+        setColors(128, 32, 0);
         break;
 
       case IR_BUTTON_3:
-        Serial.println("DEBUG: Three BLUE");
-        setColors(0, 0, 255);
+        Serial.println("DEBUG: Three RELAX LIGHT");
+        setColors(26, 6, 0);
+        dimFactor = 0.5;
         break;
 
       case IR_ARROW_DOWN:

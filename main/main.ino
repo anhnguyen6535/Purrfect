@@ -26,6 +26,8 @@ const int IR_SEND_PIN = 3;
 const int R_PIN = 10;
 const int G_PIN = 9;
 const int B_PIN = 6;
+const int TRIG_PIN = 5;
+const int ECHO_PIN = 4;
 
 /*
 * Remote vars
@@ -47,12 +49,14 @@ int bBright = 255;
 
 float dimFactor = 1.0;
 
-
-
 void setup() {
+    // Setup Ultrasonic
+    pinMode(TRIG_PIN, OUTPUT);
+    pinMode(ECHO_PIN, INPUT);
+
     // Start up Serial
     Serial.begin(115200);
-    while (!Serial)
+    while (!Serial);
 
     // Setup LED
     pinMode(R_PIN, OUTPUT);
@@ -97,6 +101,27 @@ void loop() {
         // Handle IR
         handleRemoteCommand(IrReceiver.decodedIRData.command);
     }
+
+    float distance = pollUltrasonicSensor();
+    if (distance < 10) {
+      // purr???
+      Serial.println("Purr");
+    }
+}
+
+float pollUltrasonicSensor() {
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+
+    float duration = pulseIn(ECHO_PIN, HIGH);
+    float distance = (duration * 0.0343) / 2;
+    // Serial.print("Distance: ");
+    // Serial.println(distance);
+    delay(100);
+  	return distance;
 }
 
 void handleRemoteCommand(int command){

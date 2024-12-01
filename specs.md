@@ -24,11 +24,13 @@
     + Happy: ^ ^
     + Sad: - -
     + Lovely: <3 <3
-6. Top light
+6. Top light [DONE]
 - Implement an RGB light that changes colors based on signals:
     + Outdoor environment: Bright white
-    + Walking environment: Flash red -> help car detect pedestrian
-    + Indoor reading light: Warm yellow
-    + Relax: Dim yellow
-    + Party: Disco ball lol
+    + Walking environment: Bright red -> help car detect pedestrian
+    + Indoor reading light: Warm yellow: 0x802000
+    + Relax: Dim yellow: 0x1a0600, dim: 0.5
 - Transmit signals from the remote to switch between colors or moods.
+
+## Sources
+- Ultrasonic: https://projecthub.arduino.cc/Isaac100/getting-started-with-the-hc-sr04-ultrasonic-sensor-7cabe1

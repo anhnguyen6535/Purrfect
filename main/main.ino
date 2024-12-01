@@ -35,8 +35,8 @@ const int IR_BUTTON_0 = 0x16;
 const int IR_BUTTON_1 = 0xC;
 const int IR_BUTTON_2 = 0x18;
 const int IR_BUTTON_3 = 0x5E;
-const int IR_VOL_DOWN = 0x7;
-const int IR_VOL_UP = 0x9;
+const int IR_ARROW_DOWN = 0x7;
+const int IR_ARROW_UP = 0x9;
 
 /*
 * Variables
@@ -128,12 +128,12 @@ void handleRemoteCommand(int command){
         setColors(0, 0, 255);
         break;
 
-      case IR_VOL_DOWN:
+      case IR_ARROW_DOWN:
         Serial.println("DEBUG: Decrease dim");
         adjustDimFactor(0.75);
         break;
 
-      case IR_VOL_UP:
+      case IR_ARROW_UP:
         Serial.println("DEBUG: Increase dim");
         adjustDimFactor(1.3);
         break;

@@ -21,11 +21,11 @@
 /*
 * Define PINS
 */
-int IR_RECEIVE_PIN = 2;
-int IR_SEND_PIN = 3;
-int rPin = 10;
-int gPin = 9;
-int bPin = 6;
+const int IR_RECEIVE_PIN = 2;
+const int IR_SEND_PIN = 3;
+const int R_PIN = 10;
+const int G_PIN = 9;
+const int B_PIN = 6;
 
 /*
 * Remote vars
@@ -45,7 +45,7 @@ int rBright = 255;
 int gBright = 255;
 int bBright = 255;
 
-float dimFactor = 1;
+float dimFactor = 1.0;
 
 
 
@@ -55,9 +55,9 @@ void setup() {
     while (!Serial)
 
     // Setup LED
-    pinMode(rPin, OUTPUT);    
-    pinMode(gPin, OUTPUT);    
-    pinMode(bPin, OUTPUT);    
+    pinMode(R_PIN, OUTPUT);
+    pinMode(G_PIN, OUTPUT);
+    pinMode(B_PIN, OUTPUT);
 
     // Info about program
     Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_IRREMOTE));
@@ -94,57 +94,75 @@ void loop() {
         }
         Serial.println();
 
-        /*
-         * Finally, check the received data and perform actions according to the received command
-         */
-        if (IrReceiver.decodedIRData.command == IR_POWER_OFF) {
-          Serial.println("DEBUG: Power off");
-          rBright = 0;
-          gBright = 0;
-          bBright = 0;
-          dimFactor = 0;
-        } 
-        else if (IrReceiver.decodedIRData.command == IR_BUTTON_0) {
-          Serial.println("DEBUG: On");
-          rBright = 255;
-          gBright = 255;
-          bBright = 255;
-          dimFactor = 1;
-        } 
-        else if (IrReceiver.decodedIRData.command == IR_BUTTON_1) {
-          Serial.println("DEBUG: One RED");
-          rBright = 255;
-          gBright = 0;
-          bBright = 0;
-
-        } 
-        else if (IrReceiver.decodedIRData.command == IR_BUTTON_2) {
-          Serial.println("DEBUG: Two GREEN");
-          rBright = 0;
-          gBright = 255;
-          bBright = 0;
-        }
-        else if (IrReceiver.decodedIRData.command == IR_BUTTON_3) {
-          Serial.println("DEBUG: Three BLUE");
-          rBright = 0;
-          gBright = 0;
-          bBright = 255;
-        }
-        else if (IrReceiver.decodedIRData.command == IR_VOL_DOWN) {
-          Serial.println("DEBUG: Decrease dim");
-          dimFactor *= .75;
-        }
-        else if (IrReceiver.decodedIRData.command == IR_VOL_UP) {
-          Serial.println("DEBUG: Increase dim");
-          dimFactor *= 1.3;
-          if (dimFactor > 1){
-            dimFactor = 1;
-          } 
-        }
-
-        // Change LED colors
-        analogWrite(rPin, rBright * dimFactor);
-        analogWrite(gPin, gBright * dimFactor);
-        analogWrite(bPin, bBright * dimFactor);
+        // Handle IR
+        handleRemoteCommand(IrReceiver.decodedIRData.command);
     }
+}
+
+void handleRemoteCommand(int command){
+    switch(command){
+      case IR_POWER_OFF:
+        Serial.println("DEBUG: Power off");
+        setColors(0, 0, 0);
+        dimFactor = 0;
+        break;
+
+      case IR_BUTTON_0:
+        Serial.println("DEBUG: On");
+        setColors(255, 255, 255);
+        dimFactor = 1;
+        break;
+
+      case IR_BUTTON_1:
+        Serial.println("DEBUG: One RED");
+        setColors(255, 0, 0);
+        break;
+
+      case IR_BUTTON_2:
+        Serial.println("DEBUG: Two GREEN");
+        setColors(0, 255, 0);
+        break;
+
+      case IR_BUTTON_3:
+        Serial.println("DEBUG: Three BLUE");
+        setColors(0, 0, 255);
+        break;
+
+      case IR_VOL_DOWN:
+        Serial.println("DEBUG: Decrease dim");
+        adjustDimFactor(0.75);
+        break;
+
+      case IR_VOL_UP:
+        Serial.println("DEBUG: Increase dim");
+        adjustDimFactor(1.3);
+        break;
+
+      default:
+        Serial.println(F("DEBUG: Unknown command"));
+        break;
+    }
+
+    updateRGBLED();
+}
+
+void setColors(int r, int g, int b) {
+    rBright = r;
+    gBright = g;
+    bBright = b;
+}
+
+void adjustDimFactor(float factor) {
+    dimFactor *= factor;
+    if (dimFactor > 1.0) {
+        dimFactor = 1.0;
+    } else if (dimFactor < 0.0) {
+        dimFactor = 0.0;
+    }
+}
+
+void updateRGBLED() {
+    analogWrite(R_PIN, rBright * dimFactor);
+    analogWrite(G_PIN, gBright * dimFactor);
+    analogWrite(B_PIN, bBright * dimFactor);
 }

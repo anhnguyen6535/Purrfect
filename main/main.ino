@@ -40,11 +40,13 @@ const int IR_BUTTON_2 = 0x11;
 const int IR_BUTTON_3 = 0x12;
 const int IR_ARROW_DOWN = 0x8;
 const int IR_ARROW_UP = 0xA;
+const int IR_BUTTON_4 = 0x14;
+const int IR_BUTTON_5 = 0x15;
+const int IR_BUTTON_6 = 0x16;
+const int IR_BUTTON_7 = 0x18;
+const int IR_BUTTON_8 = 0x19;
+const int IR_BUTTON_9 = 0x1a;
 
-// New emotion commands
-const int IR_BUTTON_4 = 0x13;
-const int IR_BUTTON_5 = 0x14;
-const int IR_BUTTON_6 = 0x15;
 
 /*
  * Variables
@@ -56,7 +58,7 @@ int bBright = 255;
 float dimFactor = 1;
 
 // LCD setup
-LiquidCrystal lcd(LCD_rs, LCD_en, LCD_d4, LCD_d5, LCD_d6, LCD_d7);
+LiquidCrystal lcd(12, 11, A0, 8, 7, 3);
 
 
 void setup() {
@@ -81,6 +83,8 @@ void setup() {
 
     // Start the LCD
     lcd.begin(16,2);
+  	delay(100);
+  	lcd.print("Cat!");
 
     Serial.print(F("Ready to receive IR signals of protocols: "));
     printActiveIRProtocols(&Serial);
@@ -172,7 +176,8 @@ void handleRemoteCommand(int command) {
             break;
 
         default:
-            Serial.println(F("DEBUG: Unknown command"));
+            Serial.print(F("DEBUG: Unknown command "));
+      		Serial.println("0x" + String(command, HEX));
             break;
     }
 

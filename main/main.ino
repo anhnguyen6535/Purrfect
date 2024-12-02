@@ -1,6 +1,6 @@
 /*
  * Based on the documentation on Adruino
- *
+ * Comment this out to work on Tinkercad!
  */
 
 #include <Arduino.h>
@@ -13,9 +13,11 @@
 //#define DEBUG               
 
 /*
-* Libraries
-*/
-#include <IRremote.hpp> 
+ * Libraries
+ */
+#include <IRremote.hpp>
+#include <Wire.h>
+#include <LiquidCrystal.h>
 
 
 /*
@@ -28,10 +30,18 @@ const int G_PIN = 9;
 const int B_PIN = 6;
 const int TRIG_PIN = 5;
 const int ECHO_PIN = 4;
+const int LCD_rs = 12;
+const int LCD_en = 11;
+const int LCD_d4 = 13;
+const int LCD_d5 = 8;
+const int LCD_d6 = 7;
+const int LCD_d7 = 3;
 
 /*
-* Remote vars
-*/
+ * Remote vars 
+ * Comment this out to work on Tinkercad
+ */
+/*
 const int IR_POWER_OFF = 0x45;
 const int IR_BUTTON_0 = 0x16;
 const int IR_BUTTON_1 = 0xC;
@@ -39,22 +49,70 @@ const int IR_BUTTON_2 = 0x18;
 const int IR_BUTTON_3 = 0x5E;
 const int IR_ARROW_DOWN = 0x7;
 const int IR_ARROW_UP = 0x9;
+const int IR_BUTTON_4 = 0x8;
+const int IR_BUTTON_5 = 0x1C;
+const int IR_BUTTON_6 = 0x5A;
+const int IR_BUTTON_7 = 0x42;
+const int IR_BUTTON_8 = 0x52;
+const int IR_BUTTON_9 = 0x4A;
+const int IR_VOL_UP = 0x46;
+const int IR_VOL_DOWN = 0x15;
+const int IR_BUTTON_NEXT = 0x43;
+const int IR_BUTTON_PRE = 0x44;
+const int IR_BUTTON_PAUSE = 0x40;
+const int IR_FUNC_STOP = 0x47;
+const int IR_BUTTON_EQ = 0x19;
+const int IR_BUTTON_ST = 0xD;
+*/
 
 /*
-* Variables
-*/
+ * Remote vars
+ * Comment this out to work on board
+ */
+
+// /*
+const int IR_POWER_OFF = 0x00;
+const int IR_BUTTON_0 = 0xC;
+const int IR_BUTTON_1 = 0x10;
+const int IR_BUTTON_2 = 0x11;
+const int IR_BUTTON_3 = 0x12;
+const int IR_ARROW_DOWN = 0x8;
+const int IR_ARROW_UP = 0xA;
+const int IR_BUTTON_4 = 0x14;
+const int IR_BUTTON_5 = 0x15;
+const int IR_BUTTON_6 = 0x16;
+const int IR_BUTTON_7 = 0x18;
+const int IR_BUTTON_8 = 0x19;
+const int IR_BUTTON_9 = 0x1a;
+const int IR_VOL_UP = 0x1;
+const int IR_VOL_DOWN = 0x9;
+const int IR_BUTTON_NEXT = 0x6;
+const int IR_BUTTON_PRE = 0x4;
+const int IR_BUTTON_PAUSE = 0x5;
+const int IR_FUNC_STOP = 0x2;
+const int IR_BUTTON_EQ = 0xD;
+const int IR_BUTTON_ST = 0xE;
+// */
+
+
+/*
+ * Variables
+ */
 int rBright = 255;
 int gBright = 255;
 int bBright = 255;
-
 float dimFactor = 1.0;
 
+// LCD setup
+LiquidCrystal lcd(12, 11, A0, 8, 7, 3);
+
+
 void setup() {
-    // Setup Ultrasonic
+    // Setup ultrasonic sensor
     pinMode(TRIG_PIN, OUTPUT);
     pinMode(ECHO_PIN, INPUT);
 
-    // Start up Serial
+    // Start Serial
     Serial.begin(115200);
     while (!Serial);
 
@@ -66,46 +124,33 @@ void setup() {
     // Info about program
     Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_IRREMOTE));
 
-    // Start the receiver and if not 3. parameter specified, take LED_BUILTIN pin from the internal boards definition as default feedback LED
+    // Start the receiver
     IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+
+    // Start the LCD
+    lcd.begin(16,2);
+  	delay(100);
+  	lcd.print("Cat!");
 
     Serial.print(F("Ready to receive IR signals of protocols: "));
     printActiveIRProtocols(&Serial);
 }
 
 void loop() {
-    /*
-     * Check if received data is available and if yes, try to decode it.
-     * Decoded result is in the IrReceiver.decodedIRData structure.
-     *
-     * E.g. command is in IrReceiver.decodedIRData.command
-     * address is in command is in IrReceiver.decodedIRData.address
-     * and up to 32 bit raw data in IrReceiver.decodedIRData.decodedRawData
-     */
+    // Handle IR Receiver
     if (IrReceiver.decode()) {
-
-        /*
-         * Print a summary of received data
-         */
-        // Unknown protocol
-        if (IrReceiver.decodedIRData.protocol == UNKNOWN) {
-            Serial.println(F("Received noise or an unknown (or not yet enabled) protocol"));
-            IrReceiver.printIRResultRawFormatted(&Serial, true);
-            IrReceiver.resume(); 
-        } else {
-            IrReceiver.resume(); // Enable receiving of the next IR frame
-            Serial.println(IrReceiver.lastDecodedCommand, HEX);
-        }
-        Serial.println();
-
         // Handle IR
         handleRemoteCommand(IrReceiver.decodedIRData.command);
+
+        IrReceiver.resume(); // Enable receiving of the next IR frame
+        Serial.println(IrReceiver.lastDecodedCommand, HEX); // debug
     }
 
+    // Handle Ultrasonic Sensor
     float distance = pollUltrasonicSensor();
     if (distance < 10) {
-      // purr???
-      Serial.println("Purr");
+        // purr???
+        Serial.println("Purr");
     }
 }
 
@@ -118,55 +163,69 @@ float pollUltrasonicSensor() {
 
     float duration = pulseIn(ECHO_PIN, HIGH);
     float distance = (duration * 0.0343) / 2;
-    // Serial.print("Distance: ");
-    // Serial.println(distance);
     delay(100);
-  	return distance;
+    return distance;
 }
 
-void handleRemoteCommand(int command){
-    switch(command){
-      case IR_POWER_OFF:
-        Serial.println("DEBUG: Power off");
-        setColors(0, 0, 0);
-        dimFactor = 0;
-        break;
+void handleRemoteCommand(int command) {
+    switch (command) {
+        case IR_POWER_OFF:
+            Serial.println("DEBUG: Power off");
+            setColors(0, 0, 0);
+            dimFactor = 0;
+            break;
 
-      case IR_BUTTON_0:
-        Serial.println("DEBUG: On");
-        setColors(255, 255, 255);
-        dimFactor = 1;
-        break;
+        case IR_BUTTON_0:
+            Serial.println("DEBUG: On");
+            setColors(255, 255, 255);
+            dimFactor = 1;
+            break;
 
-      case IR_BUTTON_1:
-        Serial.println("DEBUG: One RED");
-        setColors(255, 0, 0);
-        break;
+        case IR_BUTTON_1:
+            Serial.println("DEBUG: One RED");
+            setColors(255, 0, 0);
+            break;
 
-      case IR_BUTTON_2:
-        Serial.println("DEBUG: Two READING LIGHT");
-        setColors(128, 32, 0);
-        break;
+        case IR_BUTTON_2:
+            Serial.println("DEBUG: Two READING LIGHT");
+            setColors(128, 32, 0);
+            break;
 
-      case IR_BUTTON_3:
-        Serial.println("DEBUG: Three RELAX LIGHT");
-        setColors(26, 6, 0);
-        dimFactor = 0.5;
-        break;
+        case IR_BUTTON_3:
+            Serial.println("DEBUG: Three RELAX LIGHT");
+            setColors(26, 6, 0);
+            dimFactor = 0.5;
+            break;
 
-      case IR_ARROW_DOWN:
-        Serial.println("DEBUG: Decrease dim");
-        adjustDimFactor(0.75);
-        break;
+        case IR_ARROW_DOWN:
+            Serial.println("DEBUG: Decrease dim");
+            adjustDimFactor(0.75);
+            break;
 
-      case IR_ARROW_UP:
-        Serial.println("DEBUG: Increase dim");
-        adjustDimFactor(1.3);
-        break;
+        case IR_ARROW_UP:
+            Serial.println("DEBUG: Increase dim");
+            adjustDimFactor(1.3);
+            break;
 
-      default:
-        Serial.println(F("DEBUG: Unknown command"));
-        break;
+        case IR_BUTTON_4:
+            Serial.println("DEBUG: Happy Emotion");
+            displayEmotion("happy");
+            break;
+
+        case IR_BUTTON_5:
+            Serial.println("DEBUG: Sad Emotion");
+            displayEmotion("sad");
+            break;
+
+        case IR_BUTTON_6:
+            Serial.println("DEBUG: Lovely Emotion");
+            displayEmotion("lovely");
+            break;
+
+        default:
+            Serial.print(F("DEBUG: Unknown command "));
+      		  Serial.println("0x" + String(command, HEX));
+            break;
     }
 
     updateRGBLED();
@@ -191,4 +250,24 @@ void updateRGBLED() {
     analogWrite(R_PIN, rBright * dimFactor);
     analogWrite(G_PIN, gBright * dimFactor);
     analogWrite(B_PIN, bBright * dimFactor);
+}
+
+void displayEmotion(String emotion) {
+    lcd.clear();
+    if (emotion == "happy") {
+      lcd.setCursor(3, 1);
+      lcd.print("^");
+      lcd.setCursor(11, 1);
+      lcd.print("^");
+    } else if (emotion == "sad") {
+      lcd.setCursor(3, 1);
+      lcd.print("-");
+      lcd.setCursor(11, 1);
+      lcd.print("-");
+    } else if (emotion == "lovely") {
+      lcd.setCursor(3, 1);
+      lcd.print("<3");
+      lcd.setCursor(11, 1);
+      lcd.print("<3");
+    }
 }

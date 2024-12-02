@@ -6,8 +6,8 @@
 #include <Arduino.h>
 
 /*
- * Protocol
- */
+* Protocol
+*/
 #define DECODE_NEC          
 //#define DECODE_HASH         // special decoder for all protocols
 //#define DEBUG               
@@ -19,9 +19,10 @@
 #include <Wire.h>
 #include <LiquidCrystal.h>
 
+
 /*
- * Define PINS
- */
+* Define PINS
+*/
 const int IR_RECEIVE_PIN = 2;
 const int IR_SEND_PIN = 3;
 const int R_PIN = 10;
@@ -29,7 +30,6 @@ const int G_PIN = 9;
 const int B_PIN = 6;
 const int TRIG_PIN = 5;
 const int ECHO_PIN = 4;
-
 const int LCD_rs = 12;
 const int LCD_en = 11;
 const int LCD_d4 = 13;
@@ -101,8 +101,7 @@ const int IR_BUTTON_ST = 0xE;
 int rBright = 255;
 int gBright = 255;
 int bBright = 255;
-
-float dimFactor = 1;
+float dimFactor = 1.0;
 
 // LCD setup
 LiquidCrystal lcd(12, 11, A0, 8, 7, 3);
@@ -225,7 +224,7 @@ void handleRemoteCommand(int command) {
 
         default:
             Serial.print(F("DEBUG: Unknown command "));
-      		Serial.println("0x" + String(command, HEX));
+      		  Serial.println("0x" + String(command, HEX));
             break;
     }
 

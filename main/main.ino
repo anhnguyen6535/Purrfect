@@ -1,4 +1,11 @@
 /*
+ * Based on the documentation on Adruino
+ * Comment this out to work on Tinkercad!
+ */
+
+#include <Arduino.h>
+
+/*
  * Protocol
  */
 #define DECODE_NEC          
@@ -31,8 +38,39 @@ const int LCD_d6 = 7;
 const int LCD_d7 = 3;
 
 /*
- * Remote vars
+ * Remote vars 
+ * Comment this out to work on Tinkercad
  */
+/*
+const int IR_POWER_OFF = 0x45;
+const int IR_BUTTON_0 = 0x16;
+const int IR_BUTTON_1 = 0xC;
+const int IR_BUTTON_2 = 0x18;
+const int IR_BUTTON_3 = 0x5E;
+const int IR_ARROW_DOWN = 0x7;
+const int IR_ARROW_UP = 0x9;
+const int IR_BUTTON_4 = 0x8;
+const int IR_BUTTON_5 = 0x1C;
+const int IR_BUTTON_6 = 0x5A;
+const int IR_BUTTON_7 = 0x42;
+const int IR_BUTTON_8 = 0x52;
+const int IR_BUTTON_9 = 0x4A;
+const int IR_VOL_UP = 0x46;
+const int IR_VOL_DOWN = 0x15;
+const int IR_BUTTON_NEXT = 0x43;
+const int IR_BUTTON_PRE = 0x44;
+const int IR_BUTTON_PAUSE = 0x40;
+const int IR_FUNC_STOP = 0x47;
+const int IR_BUTTON_EQ = 0x19;
+const int IR_BUTTON_ST = 0xD;
+*/
+
+/*
+ * Remote vars
+ * Comment this out to work on board
+ */
+
+// /*
 const int IR_POWER_OFF = 0x00;
 const int IR_BUTTON_0 = 0xC;
 const int IR_BUTTON_1 = 0x10;
@@ -46,6 +84,15 @@ const int IR_BUTTON_6 = 0x16;
 const int IR_BUTTON_7 = 0x18;
 const int IR_BUTTON_8 = 0x19;
 const int IR_BUTTON_9 = 0x1a;
+const int IR_VOL_UP = 0x1;
+const int IR_VOL_DOWN = 0x9;
+const int IR_BUTTON_NEXT = 0x6;
+const int IR_BUTTON_PRE = 0x4;
+const int IR_BUTTON_PAUSE = 0x5;
+const int IR_FUNC_STOP = 0x2;
+const int IR_BUTTON_EQ = 0xD;
+const int IR_BUTTON_ST = 0xE;
+// */
 
 
 /*
@@ -97,6 +144,7 @@ void loop() {
         handleRemoteCommand(IrReceiver.decodedIRData.command);
 
         IrReceiver.resume(); // Enable receiving of the next IR frame
+        Serial.println(IrReceiver.lastDecodedCommand, HEX); // debug
     }
 
     // Handle Ultrasonic Sensor
@@ -208,19 +256,19 @@ void updateRGBLED() {
 void displayEmotion(String emotion) {
     lcd.clear();
     if (emotion == "happy") {
-      lcd.setCursor(4, 1);
+      lcd.setCursor(3, 1);
       lcd.print("^");
-      lcd.setCursor(12, 1);
+      lcd.setCursor(11, 1);
       lcd.print("^");
     } else if (emotion == "sad") {
-      lcd.setCursor(4, 1);
+      lcd.setCursor(3, 1);
       lcd.print("-");
-      lcd.setCursor(12, 1);
+      lcd.setCursor(11, 1);
       lcd.print("-");
     } else if (emotion == "lovely") {
-      lcd.setCursor(4, 1);
+      lcd.setCursor(3, 1);
       lcd.print("<3");
-      lcd.setCursor(12, 1);
+      lcd.setCursor(11, 1);
       lcd.print("<3");
     }
 }

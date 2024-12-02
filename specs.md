@@ -1,7 +1,7 @@
 ## Features
 1. Purring
 2. Vibrating
-3. [DONE] Touch detection: using IR or Ultrasonic
+3. [DONE] Touch detection: using Ultrasonic
 4. Movement on Wheels: by a remote controller
 5. [DONE] Eyes Show Different Emotions
 6. [DONE] RGB light on top of the cat with color changes based on signals

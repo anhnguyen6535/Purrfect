@@ -11,14 +11,14 @@
 - Activate the purring mechanism upon trigger.
 2. Vibrate
 - Activate the servo upon trigger.
-3. Detect touching
+3. Detect touching [DONE]
 - Use sensors (IR or Ultrasonic) to detect touch or proximity.
 - Once touch is detected, send a signal to trigger the purring feature.
 4. Move on wheel
 - Design and implement a wheel mechanism to allow movement.
 - Sync movement with remote controller input to enable control.
 - Transmit signals from the remote control to the wheel mechanism for directional control.
-5. Eye emotion
+5. Eye emotion [DONE]
 - Implement LED lights to represent different emotions.
 - Transmit signals from the remote control to change eye emotion:
     + Happy: ^ ^

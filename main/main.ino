@@ -202,8 +202,8 @@ void moveWheels(int direction) {
       stopCar();
     }
   	else if (direction == 1) {  // Left
-    	digitalWrite(MTR_L_FWD, HIGH);
-      digitalWrite(MTR_L_BACK, LOW);
+    	// digitalWrite(MTR_L_FWD, HIGH);
+      // digitalWrite(MTR_L_BACK, LOW);
     	digitalWrite(MTR_R_FWD, HIGH);
       digitalWrite(MTR_R_BACK, LOW);
       stopCar();
@@ -211,8 +211,8 @@ void moveWheels(int direction) {
   	else if (direction == 2) {  // Right
     	digitalWrite(MTR_L_FWD, LOW);
       digitalWrite(MTR_L_BACK, HIGH);
-    	digitalWrite(MTR_R_FWD, LOW);
-      digitalWrite(MTR_R_BACK, HIGH);
+    	// digitalWrite(MTR_R_FWD, LOW);
+      // digitalWrite(MTR_R_BACK, HIGH);
       stopCar();
     }
   	else if (direction == 3) {  // Down (Backward)

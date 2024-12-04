@@ -172,11 +172,7 @@ void loop() {
     if (distance < 10) {
         // purr???
         Serial.println("Purr");
-        // setColors(255, 255, 255);
-        // updateRGBLED();
-    }else{
-      // setColors(0, 0, 0);
-      // updateRGBLED();
+        petting();
     }
 }
 
@@ -229,6 +225,12 @@ void moveWheels(int direction) {
       digitalWrite(MTR_R_BACK, LOW);
     }
 };
+
+void petting(){
+  Serial.println("DEBUG:  Petting");
+  moveWheels(1);
+  moveWheels(3);
+}
 
 void stopCar(){
     delay(500);
@@ -316,6 +318,10 @@ void handleRemoteCommand(int command) {
       	case IR_BUTTON_PAUSE:
       		Serial.println("DEBUG: Stop");
           moveWheels(4);  // Stop
+          break;
+
+        case IR_BUTTON_EQ:
+      		petting();
           break;
 
         default:

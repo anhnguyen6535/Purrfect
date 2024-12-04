@@ -312,15 +312,11 @@ void handleRemoteCommand(int command) {
       		Serial.println("DEBUG: Moving Backward");
           moveWheels(3);  // Backward
           break;
+
       	case IR_BUTTON_PAUSE:
       		Serial.println("DEBUG: Stop");
           moveWheels(4);  // Stop
           break;
-
-      	// case IR_VOL_DOWN:
-      	// 	Serial.println("DEBUG: Moving Backward");
-        //     moveWheels(3);  // Backward
-        //     break;
 
         default:
           Serial.print(F("DEBUG: Unknown command "));

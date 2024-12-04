@@ -44,17 +44,17 @@ const int LCD_d6 = 7;
 const int LCD_d7 = 3;
 
 // Motors
-const int MTR_L_FWD = A1;
-const int MTR_L_BACK = A2;
-const int MTR_R_FWD = A3;
-const int MTR_R_BACK = A4;
+const int MTR_L_FWD = A1;   //in1
+const int MTR_L_BACK = A2;  //in2
+const int MTR_R_FWD = A3;   //in3
+const int MTR_R_BACK = A4;  //in4
 
 
 /*
  * Remote vars on BOARD
  * Comment this out to work on Tinkercad
  */
-/*
+// /*
 const int IR_POWER_OFF = 0x45;
 const int IR_BUTTON_0 = 0x16;
 const int IR_BUTTON_1 = 0xC;
@@ -76,14 +76,14 @@ const int IR_BUTTON_PAUSE = 0x40;
 const int IR_FUNC_STOP = 0x47;
 const int IR_BUTTON_EQ = 0x19;
 const int IR_BUTTON_ST = 0xD;
-*/
+// */
 
 /*
  * Remote vars on TINKERCAD
  * Comment this out to work on board
  */
 
-// /*
+/*
 const int IR_POWER_OFF = 0x00;
 const int IR_BUTTON_0 = 0xC;
 const int IR_BUTTON_1 = 0x10;
@@ -134,6 +134,13 @@ void setup() {
     pinMode(R_PIN, OUTPUT);
     pinMode(G_PIN, OUTPUT);
     pinMode(B_PIN, OUTPUT);
+    
+    // Setup Wheels
+    pinMode(MTR_L_FWD, OUTPUT);
+    pinMode(MTR_L_BACK, OUTPUT);
+    pinMode(MTR_R_FWD, OUTPUT);
+    pinMode(MTR_R_BACK, OUTPUT);
+    // pinMode(B_PIN, OUTPUT);
 
     // Info about program
     Serial.println(F("START " __FILE__ " from " __DATE__ "\r\nUsing library version " VERSION_IRREMOTE));
@@ -165,6 +172,11 @@ void loop() {
     if (distance < 10) {
         // purr???
         Serial.println("Purr");
+        // setColors(255, 255, 255);
+        // updateRGBLED();
+    }else{
+      // setColors(0, 0, 0);
+      // updateRGBLED();
     }
 }
 
@@ -183,30 +195,48 @@ float pollUltrasonicSensor() {
 
 void moveWheels(int direction) {
   	if (direction == 0) {  // Up (Forward)
-    	digitalWrite(MTR_L_FWD, HIGH);
-      	digitalWrite(MTR_L_BACK, LOW);
+    	digitalWrite(MTR_L_FWD, LOW);
+      digitalWrite(MTR_L_BACK, HIGH);
     	digitalWrite(MTR_R_FWD, HIGH);
-      	digitalWrite(MTR_R_BACK, LOW);
+      digitalWrite(MTR_R_BACK, LOW);
+      stopCar();
     }
   	else if (direction == 1) {  // Left
-    	digitalWrite(MTR_L_FWD, LOW);
-      	digitalWrite(MTR_L_BACK, HIGH);
+    	digitalWrite(MTR_L_FWD, HIGH);
+      digitalWrite(MTR_L_BACK, LOW);
     	digitalWrite(MTR_R_FWD, HIGH);
-      	digitalWrite(MTR_R_BACK, LOW);
+      digitalWrite(MTR_R_BACK, LOW);
+      stopCar();
     }
   	else if (direction == 2) {  // Right
-    	digitalWrite(MTR_L_FWD, HIGH);
-      	digitalWrite(MTR_L_BACK, LOW);
+    	digitalWrite(MTR_L_FWD, LOW);
+      digitalWrite(MTR_L_BACK, HIGH);
     	digitalWrite(MTR_R_FWD, LOW);
-      	digitalWrite(MTR_R_BACK, HIGH);
+      digitalWrite(MTR_R_BACK, HIGH);
+      stopCar();
     }
   	else if (direction == 3) {  // Down (Backward)
-    	digitalWrite(MTR_L_FWD, LOW);
-      	digitalWrite(MTR_L_BACK, HIGH);
+    	digitalWrite(MTR_L_FWD, HIGH);
+      digitalWrite(MTR_L_BACK, LOW);
     	digitalWrite(MTR_R_FWD, LOW);
-      	digitalWrite(MTR_R_BACK, HIGH);
+      digitalWrite(MTR_R_BACK, HIGH);
+      stopCar();
+    }
+    else if (direction == 4){ // Pause
+      digitalWrite(MTR_L_FWD, LOW);
+      digitalWrite(MTR_L_BACK, LOW);
+    	digitalWrite(MTR_R_FWD, LOW);
+      digitalWrite(MTR_R_BACK, LOW);
     }
 };
+
+void stopCar(){
+    delay(500);
+    digitalWrite(MTR_L_FWD, LOW);
+    digitalWrite(MTR_L_BACK, LOW);
+    digitalWrite(MTR_R_FWD, LOW);
+    digitalWrite(MTR_R_BACK, LOW);
+}
 
 void handleRemoteCommand(int command) {
     switch (command) {
@@ -264,29 +294,38 @@ void handleRemoteCommand(int command) {
             break;
       
       	case IR_VOL_UP:
-      		Serial.println("DEBUG: Moving Forward");
-            moveWheels(0);  // Forward
-            break;
+          Serial.println("DEBUG: Moving Forward");
+          moveWheels(0);  // Forward
+          break;
 
       	case IR_BUTTON_PRE:
-      		Serial.println("DEBUG: Moving Left");
-            moveWheels(1);  // Left
-            break;
+          Serial.println("DEBUG: Moving Left");
+          moveWheels(1);  // Left
+          break;
 
       	case IR_BUTTON_NEXT:
-      		Serial.println("DEBUG: Moving Right");
-            moveWheels(2);  // Right
-            break;
+          Serial.println("DEBUG: Moving Right");
+          moveWheels(2);  // Right
+          break;
 
       	case IR_VOL_DOWN:
       		Serial.println("DEBUG: Moving Backward");
-            moveWheels(3);  // Backward
-            break;
+          moveWheels(3);  // Backward
+          break;
+      	case IR_BUTTON_PAUSE:
+      		Serial.println("DEBUG: Stop");
+          moveWheels(4);  // Stop
+          break;
+
+      	// case IR_VOL_DOWN:
+      	// 	Serial.println("DEBUG: Moving Backward");
+        //     moveWheels(3);  // Backward
+        //     break;
 
         default:
-            Serial.print(F("DEBUG: Unknown command "));
+          Serial.print(F("DEBUG: Unknown command "));
       		Serial.println("0x" + String(command, HEX));
-            break;
+          break;
     }
 
     updateRGBLED();
@@ -316,19 +355,19 @@ void updateRGBLED() {
 void displayEmotion(String emotion) {
     lcd.clear();
     if (emotion == "happy") {
-      lcd.setCursor(3, 1);
+      lcd.setCursor(2, 1);
       lcd.print("^");
-      lcd.setCursor(11, 1);
+      lcd.setCursor(12, 1);
       lcd.print("^");
     } else if (emotion == "sad") {
-      lcd.setCursor(3, 1);
+      lcd.setCursor(2, 1);
       lcd.print("-");
-      lcd.setCursor(11, 1);
+      lcd.setCursor(12, 1);
       lcd.print("-");
     } else if (emotion == "lovely") {
-      lcd.setCursor(3, 1);
+      lcd.setCursor(2, 1);
       lcd.print("<3");
-      lcd.setCursor(11, 1);
+      lcd.setCursor(12, 1);
       lcd.print("<3");
     }
 }

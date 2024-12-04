@@ -3,11 +3,11 @@
  * Comment this out to work on Tinkercad!
  */
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 /*
-* Protocol
-*/
+ * Protocol
+ */
 #define DECODE_NEC          
 //#define DECODE_HASH         // special decoder for all protocols
 //#define DEBUG               
@@ -19,17 +19,23 @@
 #include <Wire.h>
 #include <LiquidCrystal.h>
 
-
 /*
-* Define PINS
-*/
+ * Define PINS
+ */
+// IR Receiver
 const int IR_RECEIVE_PIN = 2;
 const int IR_SEND_PIN = 3;
+
+// RGB LED
 const int R_PIN = 10;
 const int G_PIN = 9;
 const int B_PIN = 6;
+
+// Ultrasonic sensor
 const int TRIG_PIN = 5;
 const int ECHO_PIN = 4;
+
+// LCD screen
 const int LCD_rs = 12;
 const int LCD_en = 11;
 const int LCD_d4 = 13;
@@ -37,8 +43,15 @@ const int LCD_d5 = 8;
 const int LCD_d6 = 7;
 const int LCD_d7 = 3;
 
+// Motors
+const int MTR_L_FWD = A1;
+const int MTR_L_BACK = A2;
+const int MTR_R_FWD = A3;
+const int MTR_R_BACK = A4;
+
+
 /*
- * Remote vars 
+ * Remote vars on BOARD
  * Comment this out to work on Tinkercad
  */
 /*
@@ -66,7 +79,7 @@ const int IR_BUTTON_ST = 0xD;
 */
 
 /*
- * Remote vars
+ * Remote vars on TINKERCAD
  * Comment this out to work on board
  */
 
@@ -101,7 +114,8 @@ const int IR_BUTTON_ST = 0xE;
 int rBright = 255;
 int gBright = 255;
 int bBright = 255;
-float dimFactor = 1.0;
+
+float dimFactor = 1;
 
 // LCD setup
 LiquidCrystal lcd(12, 11, A0, 8, 7, 3);
@@ -143,7 +157,7 @@ void loop() {
         handleRemoteCommand(IrReceiver.decodedIRData.command);
 
         IrReceiver.resume(); // Enable receiving of the next IR frame
-        Serial.println(IrReceiver.lastDecodedCommand, HEX); // debug
+        Serial.println(IrReceiver.lastDecodedCommand, HEX);
     }
 
     // Handle Ultrasonic Sensor
@@ -166,6 +180,33 @@ float pollUltrasonicSensor() {
     delay(100);
     return distance;
 }
+
+void moveWheels(int direction) {
+  	if (direction == 0) {  // Up (Forward)
+    	digitalWrite(MTR_L_FWD, HIGH);
+      	digitalWrite(MTR_L_BACK, LOW);
+    	digitalWrite(MTR_R_FWD, HIGH);
+      	digitalWrite(MTR_R_BACK, LOW);
+    }
+  	else if (direction == 1) {  // Left
+    	digitalWrite(MTR_L_FWD, LOW);
+      	digitalWrite(MTR_L_BACK, HIGH);
+    	digitalWrite(MTR_R_FWD, HIGH);
+      	digitalWrite(MTR_R_BACK, LOW);
+    }
+  	else if (direction == 2) {  // Right
+    	digitalWrite(MTR_L_FWD, HIGH);
+      	digitalWrite(MTR_L_BACK, LOW);
+    	digitalWrite(MTR_R_FWD, LOW);
+      	digitalWrite(MTR_R_BACK, HIGH);
+    }
+  	else if (direction == 3) {  // Down (Backward)
+    	digitalWrite(MTR_L_FWD, LOW);
+      	digitalWrite(MTR_L_BACK, HIGH);
+    	digitalWrite(MTR_R_FWD, LOW);
+      	digitalWrite(MTR_R_BACK, HIGH);
+    }
+};
 
 void handleRemoteCommand(int command) {
     switch (command) {
@@ -221,10 +262,30 @@ void handleRemoteCommand(int command) {
             Serial.println("DEBUG: Lovely Emotion");
             displayEmotion("lovely");
             break;
+      
+      	case IR_VOL_UP:
+      		Serial.println("DEBUG: Moving Forward");
+            moveWheels(0);  // Forward
+            break;
+
+      	case IR_BUTTON_PRE:
+      		Serial.println("DEBUG: Moving Left");
+            moveWheels(1);  // Left
+            break;
+
+      	case IR_BUTTON_NEXT:
+      		Serial.println("DEBUG: Moving Right");
+            moveWheels(2);  // Right
+            break;
+
+      	case IR_VOL_DOWN:
+      		Serial.println("DEBUG: Moving Backward");
+            moveWheels(3);  // Backward
+            break;
 
         default:
             Serial.print(F("DEBUG: Unknown command "));
-      		  Serial.println("0x" + String(command, HEX));
+      		Serial.println("0x" + String(command, HEX));
             break;
     }
 

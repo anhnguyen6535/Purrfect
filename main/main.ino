@@ -151,7 +151,8 @@ void setup() {
     // Start the LCD
     lcd.begin(16,2);
   	delay(100);
-  	lcd.print("Cat!");
+  	// lcd.print("Cat!");
+    displayEmotion("sad");
 
     Serial.print(F("Ready to receive IR signals of protocols: "));
     printActiveIRProtocols(&Serial);
@@ -169,10 +170,13 @@ void loop() {
 
     // Handle Ultrasonic Sensor
     float distance = pollUltrasonicSensor();
-    if (distance < 10) {
-        // purr???
+    if (distance < 3) {
         Serial.println("Purr");
         petting();
+    } else if(distance < 15) {   // purr???
+      displayEmotion("happy");
+    } else{
+      displayEmotion("sad");
     }
 }
 
@@ -228,7 +232,8 @@ void moveWheels(int direction) {
 
 void petting(){
   Serial.println("DEBUG:  Petting");
-  moveWheels(1);
+  displayEmotion("lovely");
+  moveWheels(0);
   moveWheels(3);
 }
 

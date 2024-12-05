@@ -54,7 +54,7 @@ const int MTR_R_BACK = A4;  //in4
  * Remote vars on BOARD
  * Comment this out to work on Tinkercad
  */
-// /*
+//  /*
 const int IR_POWER_OFF = 0x45;
 const int IR_BUTTON_0 = 0x16;
 const int IR_BUTTON_1 = 0xC;
@@ -117,9 +117,98 @@ int bBright = 255;
 
 float dimFactor = 1;
 
+bool debug = false;
+
 // LCD setup
 LiquidCrystal lcd(12, 11, A0, 8, 7, 3);
 
+ byte heartTopLeft[8] = {
+   0b00000, 
+   0b00000,
+   0b00000,
+   0b00000,
+   0b00110,
+   0b01111,
+   0b11111,
+   0b11111 
+};
+
+byte heartTopRight[8] = {
+   0b00000, 
+   0b00000,
+   0b00000,
+   0b00000,
+   0b01100,
+   0b11110,
+   0b11111,
+   0b11111 
+};
+
+byte heartBottomLeft[8] = {
+   0b11111,
+   0b01111,
+   0b00111,
+   0b00011,
+   0b00001,
+   0b00000,
+   0b00000,
+   0b00000
+};
+
+byte heartBottomRight[8] = {
+   0b11111,
+   0b11110,
+   0b11100,
+   0b11000,
+   0b10000,
+   0b00000,
+   0b00000,
+   0b00000
+};
+
+byte happyTopLeft[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00001,
+  0b00010,
+  0b00100
+};
+
+byte happyTopRight[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b10000,
+  0b01000,
+  0b00100
+};
+
+byte happyBottomLeft[8] = {
+  0b01000,
+  0b10000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000
+};
+
+byte happyBottomRight[8] = {
+  0b00010,
+  0b00001,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000,
+  0b00000
+};
 
 void setup() {
     // Setup ultrasonic sensor
@@ -150,6 +239,17 @@ void setup() {
 
     // Start the LCD
     lcd.begin(16,2);
+  
+  	lcd.createChar(0, heartTopLeft);
+  	lcd.createChar(1, heartTopRight);
+    lcd.createChar(2, heartBottomLeft);
+  	lcd.createChar(3, heartBottomRight);
+  	//lcd.createChar(4, sad);
+  	lcd.createChar(4, happyTopLeft);
+  	lcd.createChar(5, happyTopRight);
+  	lcd.createChar(6, happyBottomLeft);
+  	lcd.createChar(7, happyBottomRight);
+  
   	delay(100);
   	// lcd.print("Cat!");
     displayEmotion("sad");
@@ -165,18 +265,21 @@ void loop() {
         handleRemoteCommand(IrReceiver.decodedIRData.command);
 
         IrReceiver.resume(); // Enable receiving of the next IR frame
-        Serial.println(IrReceiver.lastDecodedCommand, HEX);
+        // Serial.println(IrReceiver.lastDecodedCommand, HEX);
     }
 
     // Handle Ultrasonic Sensor
     float distance = pollUltrasonicSensor();
-    if (distance < 3) {
-        Serial.println("Purr");
-        petting();
-    } else if(distance < 15) {   // purr???
-      displayEmotion("happy");
-    } else{
-      displayEmotion("sad");
+    // Serial.println(debug);
+    if(!debug){
+      if (distance < 3) {
+          // Serial.println("Purr");
+          petting();
+      } else if(distance < 15) {   // purr???
+        displayEmotion("happy");
+      } else{
+        displayEmotion("sad");
+      }
     }
 }
 
@@ -202,8 +305,8 @@ void moveWheels(int direction) {
       stopCar();
     }
   	else if (direction == 1) {  // Left
-    	// digitalWrite(MTR_L_FWD, HIGH);
-      // digitalWrite(MTR_L_BACK, LOW);
+    	//digitalWrite(MTR_L_FWD, HIGH);
+      //digitalWrite(MTR_L_BACK, LOW);
     	digitalWrite(MTR_R_FWD, HIGH);
       digitalWrite(MTR_R_BACK, LOW);
       stopCar();
@@ -211,8 +314,8 @@ void moveWheels(int direction) {
   	else if (direction == 2) {  // Right
     	digitalWrite(MTR_L_FWD, LOW);
       digitalWrite(MTR_L_BACK, HIGH);
-    	// digitalWrite(MTR_R_FWD, LOW);
-      // digitalWrite(MTR_R_BACK, HIGH);
+    	//digitalWrite(MTR_R_FWD, LOW);
+      //digitalWrite(MTR_R_BACK, HIGH);
       stopCar();
     }
   	else if (direction == 3) {  // Down (Backward)
@@ -326,8 +429,20 @@ void handleRemoteCommand(int command) {
           break;
 
         case IR_BUTTON_EQ:
+      		Serial.println("DEBUG: PETTING");
       		petting();
           break;
+
+        case IR_BUTTON_7: 
+      		Serial.println("DEBUG: ENABLE DEBUG");
+          debug = true;
+          break;
+
+        case IR_BUTTON_8: 
+      		Serial.println("DEBUG: DISABLE DEBUG");
+          debug = false;
+          break;
+
 
         default:
           Serial.print(F("DEBUG: Unknown command "));
@@ -362,19 +477,55 @@ void updateRGBLED() {
 void displayEmotion(String emotion) {
     lcd.clear();
     if (emotion == "happy") {
+      lcd.setCursor(2, 0);
+      lcd.write(byte(4));
+      lcd.setCursor(3, 0);
+      lcd.write(byte(5));
       lcd.setCursor(2, 1);
-      lcd.print("^");
+      lcd.write(byte(6));
+      lcd.setCursor(3, 1);
+      lcd.write(byte(7));
+      
+      lcd.setCursor(12, 0);
+      lcd.write(byte(4));
+      lcd.setCursor(13, 0);
+      lcd.write(byte(5));
       lcd.setCursor(12, 1);
-      lcd.print("^");
+      lcd.write(byte(6));
+      lcd.setCursor(13, 1);
+      lcd.write(byte(7));
+      
     } else if (emotion == "sad") {
-      lcd.setCursor(2, 1);
-      lcd.print("-");
-      lcd.setCursor(12, 1);
-      lcd.print("-");
+      lcd.setCursor(2, 0);
+      //lcd.write(byte(4));
+      lcd.print("_");
+      lcd.setCursor(3, 0);
+      lcd.print("_");
+      //lcd.write(byte(4));
+      lcd.setCursor(12, 0);
+      //lcd.write(byte(4));
+      lcd.print("_");
+      lcd.setCursor(13, 0);
+      //lcd.write(byte(4));
+      lcd.print("_");
+      
     } else if (emotion == "lovely") {
+      lcd.setCursor(2, 0);
+      lcd.write(byte(0));
+      lcd.setCursor(3,0);
+      lcd.write(byte(1));
       lcd.setCursor(2, 1);
-      lcd.print("<3");
+      lcd.write(byte(2));
+      lcd.setCursor(3, 1);
+      lcd.write(byte(3));
+
+      lcd.setCursor(12, 0);
+      lcd.write(byte(0));
+      lcd.setCursor(13,0);
+      lcd.write(byte(1));
       lcd.setCursor(12, 1);
-      lcd.print("<3");
+      lcd.write(byte(2));
+      lcd.setCursor(13, 1);
+      lcd.write(byte(3)); 
     }
 }
